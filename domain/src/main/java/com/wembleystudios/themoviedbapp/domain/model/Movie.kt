@@ -1,4 +1,9 @@
 package com.wembleystudios.themoviedbapp.domain.model
 
-class Movie {
-}
+data class Movie(
+    val id: Int,
+    val title: String?,
+    val overview: String?,
+    val releaseDate: String?,
+    val image: String?
+)
