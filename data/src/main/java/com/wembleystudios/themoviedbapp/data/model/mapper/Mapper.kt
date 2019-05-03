@@ -1,4 +1,4 @@
-package com.wembleystudios.themoviedbapp.data.model
+package com.wembleystudios.themoviedbapp.data.model.mapper
 
 /**
  * Created by Iván Carrasco Alonso on 02/05/2019.

@@ -1,7 +1,7 @@
 package com.wembleystudios.themoviedbapp.data.api
 
 import com.wembleystudios.themoviedbapp.data.model.MoviesPageData
-import io.reactivex.Observable
+import io.reactivex.Single
 
 
 /**
@@ -9,7 +9,7 @@ import io.reactivex.Observable
  */
 interface ApiSource {
 
-    fun getPopularMovies(page: Int, language: String): Observable<MoviesPageData>
+    fun getPopularMovies(page: Int, language: String): Single<MoviesPageData>
 
-    fun getSearchMovies(query: String, page: Int, language: String): Observable<MoviesPageData>
+    fun getSearchMovies(query: String, page: Int, language: String): Single<MoviesPageData>
 }

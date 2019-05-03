@@ -5,7 +5,7 @@ package com.wembleystudios.themoviedbapp.data.model
  */
 data class MovieData(
     val vote_count: Int?,
-    val id: Int?,
+    val id: Int,
     val video: Boolean?,
     val vote_average: Float?,
     val title: String?,
