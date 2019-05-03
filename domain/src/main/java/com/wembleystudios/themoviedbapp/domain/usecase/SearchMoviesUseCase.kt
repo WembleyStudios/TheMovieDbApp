@@ -5,5 +5,5 @@ import io.reactivex.Single
 
 interface SearchMoviesUseCase {
 
-    fun getPopularMovies(search: String, page: Int): Single<MoviesPage>
+    fun searchMovies(search: String, page: Int): Single<MoviesPage>
 }
