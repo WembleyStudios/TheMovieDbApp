@@ -1,4 +1,4 @@
-package com.wembleystudios.themoviedbapp.data.api
+package com.wembleystudios.themoviedbapp.data.api.interceptor
 
 import okhttp3.Interceptor
 import okhttp3.Response
