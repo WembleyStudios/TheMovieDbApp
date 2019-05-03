@@ -6,6 +6,6 @@ import retrofit2.http.GET
 
 interface ConfigurationService {
 
-    @GET("/configuration")
+    @GET("3/configuration")
     fun getConfiguration(): Single<ApiConfigurationData>
 }

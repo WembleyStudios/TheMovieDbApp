@@ -7,9 +7,9 @@ import retrofit2.http.Query
 
 interface MoviesService {
 
-    @GET("/movie/popular")
+    @GET("3/movie/popular")
     fun getPopularMovies(@Query("page") page: Int): Single<MoviesPageData>
 
-    @GET("/search/movie")
+    @GET("3/search/movie")
     fun getSearchMovies(@Query("query") query: String, @Query("page") page: Int): Single<MoviesPageData>
 }
