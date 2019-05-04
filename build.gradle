@@ -22,6 +22,7 @@ buildscript {
         jUnitVersion = '4.12'
         testRunnerVersion = '1.1.0'
         espressoVersion = '3.1.0'
+        pagingVersion = '2.1.0'
     }
 
     repositories {
