@@ -11,14 +11,14 @@ import io.reactivex.functions.BiFunction
  */
 class MoviesApiDataSource(
     private val moviesService: MoviesService,
-    private val configurationService: ConfigurationService,
+    private val configurationSource: ConfigurationSource,
     private val moviesPageMapper: MoviesPageMapper
 ) {
 
     fun getPopularMovies(page: Int): Single<MoviesPage> {
         return Single.zip(
             moviesService.getPopularMovies(page),
-            configurationService.getConfiguration().onErrorReturnItem(ApiConfigurationData.EMPTY),
+            configurationSource.getConfiguration().onErrorReturnItem(ApiConfigurationData.EMPTY),
             BiFunction { movies, config -> moviesPageMapper.map(movies, config) })
     }
 
@@ -26,7 +26,7 @@ class MoviesApiDataSource(
     fun getSearchMovies(query: String, page: Int): Single<MoviesPage> {
         return Single.zip(
             moviesService.getSearchMovies(query, page),
-            configurationService.getConfiguration().onErrorReturnItem(ApiConfigurationData.EMPTY),
+            configurationSource.getConfiguration().onErrorReturnItem(ApiConfigurationData.EMPTY),
             BiFunction { movies, config -> moviesPageMapper.map(movies, config) })
     }
 }

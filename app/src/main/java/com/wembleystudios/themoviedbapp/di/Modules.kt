@@ -1,11 +1,6 @@
 package com.wembleystudios.themoviedbapp.di
 
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.wembleystudios.themoviedbapp.adapter.PagedMoviesAdapter
-import com.wembleystudios.themoviedbapp.data.api.ConfigurationService
-import com.wembleystudios.themoviedbapp.data.api.MoviesApiDataSource
-import com.wembleystudios.themoviedbapp.data.api.MoviesService
-import com.wembleystudios.themoviedbapp.data.api.ServiceBuilder
+import com.wembleystudios.themoviedbapp.data.api.*
 import com.wembleystudios.themoviedbapp.data.mapper.ImageBuilder
 import com.wembleystudios.themoviedbapp.data.mapper.MovieMapper
 import com.wembleystudios.themoviedbapp.data.mapper.MoviesPageMapper
@@ -31,7 +26,6 @@ private const val OBSERVE_SCHEDULER = "observe_scheduler"
 private const val SUBSCRIBE_SCHEDULER = "subscribe_scheduler"
 
 val appModule = module {
-    factory { PagedMoviesAdapter(get()) }
     factory(OBSERVE_SCHEDULER) { AndroidSchedulers.mainThread() }
     factory(SUBSCRIBE_SCHEDULER) { Schedulers.io() }
 }
@@ -39,7 +33,6 @@ val appModule = module {
 val presentationModule = module {
     viewModel { MainViewModel(get(), get(), get(), get(SUBSCRIBE_SCHEDULER), get(OBSERVE_SCHEDULER)) }
     factory { MoviePresentationMapper() }
-    factory { LinearLayoutManager(get()) }
     factory { MoviesPagePresentationMapper(get()) }
 }
 
@@ -56,5 +49,6 @@ val dataModule = module {
     factory { MovieMapper(get()) }
     factory { MoviesPageMapper(get()) }
     factory { MoviesApiDataSource(get(), get(), get()) }
+    factory { ConfigurationSource(get()) }
     factory<MoviesRepository> { MoviesRepositoryImpl(get()) }
 }

@@ -1,42 +1,47 @@
 package com.wembleystudios.themoviedbapp
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.widget.RxTextView
+import com.wembleystudios.themoviedbapp.adapter.EndlessScrollListener
 import com.wembleystudios.themoviedbapp.adapter.PagedMoviesAdapter
 import com.wembleystudios.themoviedbapp.presentation.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModel()
-    private val adapter: PagedMoviesAdapter by inject()
-    private val layoutManager: LinearLayoutManager
-            by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        rvMovies.apply {
-            setHasFixedSize(true)
-            layoutManager = this@MainActivity.layoutManager
-            adapter = this@MainActivity.adapter
-        }
+        val adapter = PagedMoviesAdapter()
+        val layoutManager = LinearLayoutManager(this)
+        rvMovies.layoutManager = layoutManager
+        rvMovies.adapter = adapter
+        rvMovies.addOnScrollListener(object : EndlessScrollListener(layoutManager) {
+            override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) = viewModel.loadMore()
+        })
 
         viewModel.searchObservable =
             RxTextView.textChanges(etSearch)
-                .skipInitialValue()
                 .debounce(250, TimeUnit.MILLISECONDS)
                 .map { it.toString() }
+                .distinctUntilChanged()
 
-        viewModel.moviesLiveData.observe(this, Observer {
-            adapter.onItemsUpdate(it)
+        viewModel.stateLiveData.observe(this, Observer {
+            it?.let { state ->
+                viewLoading.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                tvError.visibility = if (state.isError) View.VISIBLE else View.GONE
+                adapter.submitList(state.movies)
+            }
         })
     }
 }

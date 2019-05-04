@@ -7,12 +7,11 @@ import com.wembleystudios.themoviedbapp.domain.model.MoviesPage
 import com.wembleystudios.themoviedbapp.domain.usecase.GetPopularMoviesUseCase
 import com.wembleystudios.themoviedbapp.domain.usecase.SearchMoviesUseCase
 import com.wembleystudios.themoviedbapp.presentation.mapper.MoviesPagePresentationMapper
-import com.wembleystudios.themoviedbapp.presentation.model.MoviePresentation
+import com.wembleystudios.themoviedbapp.presentation.model.MoviesPageSearchPresentation
 import com.wembleystudios.themoviedbapp.presentation.model.SearchMoviesParams
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
 import kotlin.properties.Delegates
@@ -27,42 +26,61 @@ class MainViewModel(
 
     private val disposableBag: CompositeDisposable = CompositeDisposable()
 
-    private var searchDisposable: Disposable? = null
-
-    private var pageObservable: BehaviorSubject<Int> = BehaviorSubject.createDefault(FIRST_PAGE)
+    private val pageObservable: BehaviorSubject<Int> = BehaviorSubject.createDefault(FIRST_PAGE)
 
     private var lastResults: MoviesPage? = null
 
-    var searchObservable: Observable<String> by Delegates.observable(Observable.empty()) { _, _, searchObservable ->
-        searchDisposable?.dispose()
-        searchDisposable = Observable.combineLatest<String, Int, SearchMoviesParams>(
+    var searchObservable: Observable<String> by Delegates.observable(Observable.just("")) { _, _, _ ->
+        subscribeMovies()
+    }
+
+    private val _stateLiveData: MutableLiveData<MainState> = MutableLiveData()
+    val stateLiveData: LiveData<MainState> = _stateLiveData
+
+    init {
+        subscribeMovies()
+    }
+
+    private fun subscribeMovies() {
+        disposableBag.clear()
+        disposableBag.add(Observable.combineLatest<String, Int, SearchMoviesParams>(
             searchObservable.doOnNext { pageObservable.onNext(FIRST_PAGE) },
             pageObservable,
             BiFunction { search, page -> SearchMoviesParams(search, page) }
         ).switchMapSingle { params ->
-            searchMoviesUseCase.searchMovies(params.search, params.page)
+            val useCase = if (params.search.isBlank()) {
+                getPopularMoviesUseCase.getPopularMovies(params.page)
+            } else {
+                searchMoviesUseCase.searchMovies(params.search, params.page)
+            }
+            useCase
                 .doOnSuccess { lastResults = it }
-                .map(moviesPageMapper::map)
-                .onErrorReturnItem(emptyList())
-        }.subscribeOn(subscribeOnScheduler)
-            .observeOn(observeOnScheduler)
-            .subscribe(
-                { items ->
-                    _moviesLiveData.value = items
-                },
-                {
-                    _moviesLiveData.value = emptyList()
-                })
-
-        searchDisposable?.let(disposableBag::add)
+                .doOnSubscribe {
+                    val lastState = _stateLiveData.value
+                    _stateLiveData.postValue(lastState?.copy(isError = false, isLoading = true))
+                }
+                .map { moviesPageMapper.map(it, params.search) }
+                .onErrorReturnItem(MoviesPageSearchPresentation.EMPTY)
+                .subscribeOn(subscribeOnScheduler)
+                .observeOn(observeOnScheduler)
+        }.scan { old: MoviesPageSearchPresentation, new: MoviesPageSearchPresentation ->
+            if (old.search == new.search && old.page != new.page) {
+                new.copy(results = old.results + new.results)
+            } else {
+                new
+            }
+        }.subscribe(
+            { page ->
+                _stateLiveData.value = MainState(movies = page.results, isError = false, isLoading = false)
+            }, {
+                _stateLiveData.value = MainState(movies = emptyList(), isError = true, isLoading = false)
+            })
+        )
     }
-
-    private val _moviesLiveData: MutableLiveData<List<MoviePresentation>> = MutableLiveData()
-    val moviesLiveData: LiveData<List<MoviePresentation>> = _moviesLiveData
 
     fun loadMore() {
         if (lastResults?.hasMoreResults == true) {
-            pageObservable.onNext(lastResults?.page ?: FIRST_PAGE)
+            lastResults?.page?.let { page -> pageObservable.onNext(page + 1) }
         }
     }
 

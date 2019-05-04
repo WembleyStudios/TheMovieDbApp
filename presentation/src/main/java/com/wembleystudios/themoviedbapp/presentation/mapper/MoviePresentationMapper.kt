@@ -8,6 +8,7 @@ import java.util.*
 class MoviePresentationMapper {
 
     fun map(from: Movie): MoviePresentation = MoviePresentation(
+        from.id.toString(),
         from.title.orEmpty(),
         from.overview.orEmpty(),
         from.releaseDate?.parseYear.orEmpty(),
