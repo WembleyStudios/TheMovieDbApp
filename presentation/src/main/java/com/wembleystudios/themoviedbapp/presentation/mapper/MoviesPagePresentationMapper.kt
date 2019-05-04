@@ -1,15 +1,14 @@
 package com.wembleystudios.themoviedbapp.presentation.mapper
 
 import com.wembleystudios.themoviedbapp.domain.model.MoviesPage
-import com.wembleystudios.themoviedbapp.presentation.model.MoviesPageSearchPresentation
+import com.wembleystudios.themoviedbapp.presentation.model.MoviesPagePresentation
 
 class MoviesPagePresentationMapper(private val moviePresentationMapper: MoviePresentationMapper) {
 
-    fun map(from: MoviesPage, search: String): MoviesPageSearchPresentation =
-        MoviesPageSearchPresentation(
+    fun map(from: MoviesPage): MoviesPagePresentation =
+        MoviesPagePresentation(
             from.page,
             from.results.map(moviePresentationMapper::map),
-            from.hasMoreResults,
-            search
+            from.hasMoreResults
         )
 }

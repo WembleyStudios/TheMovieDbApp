@@ -10,6 +10,7 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import com.wembleystudios.themoviedbapp.adapter.EndlessScrollListener
 import com.wembleystudios.themoviedbapp.adapter.PagedMoviesAdapter
 import com.wembleystudios.themoviedbapp.presentation.viewmodel.MainViewModel
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModel()
 
+    private var disposable: Disposable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,11 +32,12 @@ class MainActivity : AppCompatActivity() {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) = viewModel.loadMore()
         })
 
-        viewModel.searchObservable =
-            RxTextView.textChanges(etSearch)
-                .debounce(250, TimeUnit.MILLISECONDS)
-                .map { it.toString() }
-                .distinctUntilChanged()
+        disposable = RxTextView.textChanges(etSearch)
+            .skipInitialValue()
+            .debounce(250, TimeUnit.MILLISECONDS)
+            .map { it.toString().trim() }
+            .distinctUntilChanged()
+            .subscribe(viewModel::onSearch)
 
         viewModel.stateLiveData.observe(this, Observer {
             it?.let { state ->
@@ -43,5 +46,10 @@ class MainActivity : AppCompatActivity() {
                 adapter.submitList(state.movies)
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable?.dispose()
     }
 }
