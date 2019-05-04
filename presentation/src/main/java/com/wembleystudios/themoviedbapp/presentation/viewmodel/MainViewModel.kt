@@ -31,8 +31,9 @@ class MainViewModel(
         BehaviorSubject.createDefault(SearchMoviesParams.DEFAULT)
 
     init {
-        val disposable =
-            searchParamsSubject.switchMapSingle { params ->
+        val disposable = searchParamsSubject
+            .observeOn(subscribeOnScheduler)
+            .switchMapSingle { params ->
                 /*Get different use case based on params*/
                 val useCase = if (params.search.isBlank()) {
                     getPopularMoviesUseCase.getPopularMovies(params.page)
@@ -49,9 +50,8 @@ class MainViewModel(
                     .doOnSuccess { lastResults = it }
                     .map(MoviesPagePresentation::results)
                     .onErrorReturnItem(emptyList())
-                    .subscribeOn(subscribeOnScheduler)
-                    .observeOn(observeOnScheduler)
-            }.subscribe({ results ->
+            }.observeOn(observeOnScheduler)
+            .subscribe({ results ->
                 _stateLiveData.value = MainState(movies = results, isError = false, isLoading = false)
             }, {
                 _stateLiveData.value = MainState(movies = emptyList(), isError = true, isLoading = false)
