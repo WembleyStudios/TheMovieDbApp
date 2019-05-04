@@ -66,7 +66,7 @@ class MainViewModel(
         lastResults = null
         val lastState = _stateLiveData.value
         _stateLiveData.postValue(lastState?.copy(isError = false, isLoading = true))
-        searchParamsSubject.onNext(SearchMoviesParams(search, FIRST_PAGE))
+        searchParamsSubject.onNext(SearchMoviesParams(search, Constants.FIRST_PAGE))
     }
 
     fun loadMore() {
@@ -81,10 +81,6 @@ class MainViewModel(
     override fun onCleared() {
         super.onCleared()
         disposableBag.dispose()
-    }
-
-    companion object {
-        private const val FIRST_PAGE = 1
     }
 
 }
