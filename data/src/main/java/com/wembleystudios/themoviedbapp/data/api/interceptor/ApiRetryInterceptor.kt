@@ -9,7 +9,10 @@ import kotlin.concurrent.timerTask
  * Created by Iván Carrasco Alonso on 2019-05-03.
  */
 class ApiRetryInterceptor : Interceptor {
-
+    /*
+        If the server responds with a Retry-After header because of the app exceeded the request limit of 40 request
+        in 10 seconds, wait the Retry-after time limit and then retry the request
+     */
     override fun intercept(chain: Interceptor.Chain): Response {
 
         val request = chain.request()

@@ -52,7 +52,7 @@ class MainViewModel(
                     .onErrorReturnItem(emptyList())
             }.observeOn(observeOnScheduler)
             .subscribe({ results ->
-                _stateLiveData.value = MainState(movies = results, isError = false, isLoading = false)
+                _stateLiveData.value = MainState(movies = results, isError = results.isEmpty(), isLoading = false)
             }, {
                 _stateLiveData.value = MainState(movies = emptyList(), isError = true, isLoading = false)
             })
@@ -70,6 +70,8 @@ class MainViewModel(
     }
 
     fun loadMore() {
+
+        //if the lastResults has more results it has minimum another page to load so
         if (lastResults?.hasMoreResults == true) {
             val lastState = _stateLiveData.value
             _stateLiveData.postValue(lastState?.copy(isError = false, isLoading = true))

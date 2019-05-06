@@ -4,6 +4,9 @@ import com.wembleystudios.themoviedbapp.domain.model.MoviesPage
 import com.wembleystudios.themoviedbapp.domain.repository.MoviesRepository
 import io.reactivex.Single
 
+/**
+ * Implementation of SearchMoviesUseCase
+ */
 class SearchMoviesInteractor(private val moviesRepository: MoviesRepository) : SearchMoviesUseCase {
 
     override fun searchMovies(search: String, page: Int): Single<MoviesPage> =

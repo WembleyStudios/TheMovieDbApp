@@ -4,6 +4,9 @@ import android.app.Application
 import com.wembleystudios.themoviedbapp.di.*
 import org.koin.android.ext.android.startKoin
 
+/**
+ * Custom application class for init the dependency injection with koin
+ */
 
 class App : Application() {
 

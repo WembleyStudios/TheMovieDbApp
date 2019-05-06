@@ -9,6 +9,9 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
+/*
+    Base Service builder used to build retrofit services
+ */
 class ServiceBuilder(val baseUrl: String, val apiKey: String) {
 
     inline fun <reified T> create(): T {
